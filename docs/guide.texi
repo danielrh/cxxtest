@@ -10,8 +10,6 @@
 @c Title Page
 @titlepage
 @title CxxTest User's Guide
-@subtitle $Revision: 1.72 $
-@author Erez Volk, @email{erez_v at users dot sourceforge dot net}
 @end titlepage
 
 @c Table of Contents for printed manual
@@ -152,13 +150,12 @@ and/or unit testing.  It describes the design and usage of CxxTest.
 @c =====================
 
 @section Getting CxxTest
-The homepage for CxxTest is @uref{http://cxxtest.sourceforge.net}.  You
-can always get the latest release from the SourceForge download page,
-@uref{http://sourceforge.net/project/showfiles.php?group_id=52834, here}
-or @uref{http://dl.sourceforge.net/cxxtest, here}.  The latest version
-of this guide is available online at
-@uref{http://cxxtest.sourceforge.net/guide.html}.  A PDF version is also
-available at @uref{http://cxxtest.sourceforge.net/guide.pdf}.
+The homepage for CxxTest is @uref{http://cxxtest.tigris.org}.  You
+can always get the latest release from the documents and files page,
+@uref{http://cxxtest.tigris.org/servlets/ProjectDocumentList, here}.
+ The latest version of this guide is available online at
+@uref{http://cxxtest.tigris.org/guide.html}.  A PDF version is also
+available at @uref{http://cxxtest.tigris.org/guide.pdf}.
 
 @section Your first test!
 
@@ -197,13 +194,13 @@ public:
 After you have your test suites, you use CxxTest to generate a ``test runner'' source file:
 
 @verbatim
-# cxxtestgen.pl --error-printer -o runner.cpp MyTestSuite.h
+# cxxtestgen.py --error-printer -o runner.cpp MyTestSuite.h
 @end verbatim
 
 or, for those less fortunate:
 
 @verbatim
-C:\tmp> perl -w cxxtestgen.pl --error-printer -o runner.cpp MyTestSuite.h
+C:\tmp> python cxxtestgen.py --error-printer -o runner.cpp MyTestSuite.h
 @end verbatim
 
 
@@ -290,18 +287,18 @@ your compiler, OS and environment, but try the following pointers:
 @itemize @bullet
 
 @item 
-Under Windows with Visual C++, run @command{perl cxxtestgen.pl @w{-o runner.cpp} 
+Under Windows with Visual C++, run @command{python cxxtestgen.py @w{-o runner.cpp} 
 @w{@emph{--gui=Win32Gui}} MyTestSuite.h}.
 
 @item
-Under X-Windows, try @command{./cxxtestgen.pl @w{-o runner.cpp}
+Under X-Windows, try @command{./cxxtestgen.py @w{-o runner.cpp}
 @w{@emph{--gui=X11Gui}} MyTestSuite}.  You may need to tell the compiler
 where to find X, usually something like @command{g++ @w{-o runner}
 @w{-L/usr/X11R6/lib} runner.cpp @w{-lX11}}.
 
 @item
 If you have @uref{http://www.trolltech.com,Qt} installed, try running
-@command{cxxtestgen.pl} with the option @w{@command{--gui=QtGui}}.  As
+@command{cxxtestgen.py} with the option @w{@command{--gui=QtGui}}.  As
 always, compile and link the the Qt headers and libraries.
 
 @end itemize
@@ -814,7 +811,7 @@ runner: runner.cpp lib
 
 # How to generate the test runner
 runner.cpp: SimpleTest.h ComplicatedTest.h
-         cxxtestgen.pl -o $@ --error-printer $^
+         cxxtestgen.py -o $@ --error-printer $^
 @end verbatim
 @end smallexample
 
@@ -1548,7 +1545,7 @@ with your environment or is unsupported by your compiler, don't dispair!
 You may still be able to use the @code{StdioPrinter}, which does the
 exact same thing but uses good old @code{printf()}.
 
-To use it, invoke @file{cxxtestgen.pl} with the @option{--runner=StdioPrinter} option.
+To use it, invoke @file{cxxtestgen.py} with the @option{--runner=StdioPrinter} option.
 
 @addedIn{3.8.5}@strong{Note:} @file{cxxtest/StdioPrinter} makes
 reference to @code{stdout} as the default output stream.  In some
@@ -1567,7 +1564,7 @@ You can see an example of using this listener in @file{sample/yes_no_runner.cpp}
 @subsubsection Template files
 To use you own test runner, or to use the supplied ones in different ways, you can use
 CxxTest @emph{template files}.  These are ordinary source files with the embedded ``command''
-@code{<CxxTest world>} which tells @file{cxxtestgen.pl} to insert the world definition
+@code{<CxxTest world>} which tells @file{cxxtestgen.py} to insert the world definition
 at that point.  You then specify the template file using the @option{--template} option.
 
 See @file{samples/file_printer.tpl} for an example.
