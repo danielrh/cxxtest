@@ -20,7 +20,7 @@
         public: \
             static T defaultValue() { return 0; } \
         }; \
-    };
+    }
 
 //
 // extern "C" when needed
