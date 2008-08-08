@@ -49,7 +49,7 @@ GetOptions( 'no-python' => \$noPython,
 	    'win32=s' =>\$w32Flags,
 	    'x11=s' =>\$x11Flags,
 	    'bcc32' => sub { $compiler = 'bcc32 -w-'; $exe_option = '-e'; $no_eh_option = '-x-' },
-	    'gcc' => sub { $compiler = 'g++ -g -Wall -W -Werror -Wshadow -Woverloaded-virtual -Wnon-virtual-dtor -Wreorder -Wsign-promo'; $no_eh_option = '-fno-exceptions' }
+	    'gcc' => sub { $compiler = 'g++ -g -Wall -W -Wshadow -Woverloaded-virtual -Wnon-virtual-dtor -Wreorder -Wsign-promo'; $no_eh_option = '-fno-exceptions' }
 	  );
 
 #
