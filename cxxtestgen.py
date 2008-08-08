@@ -70,14 +70,14 @@ def usageString():
 def abort( problem ):
     '''Print error message and exit'''
     sys.stderr.write( '\n' )
-    sys.stderr.write( problem )
+    sys.stderr.write( str(problem) )
     sys.stderr.write( '\n\n' )
     sys.exit(2)
 
 def parseCommandline():
     '''Analyze command line arguments'''
     try:
-        options, patterns = getopt.getopt( sys.argv[1:], 'o:r:',
+        options, patterns = getopt.getopt( sys.argv[1:], 'o:r:v',
                                            ['version', 'output=', 'runner=', 'gui=',
                                             'error-printer', 'abort-on-fail', 'have-std', 'no-std',
                                             'have-eh', 'no-eh', 'template=', 'include=',
