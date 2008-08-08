@@ -345,7 +345,7 @@ namespace CxxTest
             case WM_CLOSE:
             case WM_DESTROY:
             case WM_QUIT:
-                ExitProcess( 0 );
+                ExitProcess( tracker().failedTests() );
 
             default: return DefWindowProc( window, message, wParam, lParam );
             }
