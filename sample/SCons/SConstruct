@@ -1,42 +1,38 @@
+
+cxxtestbuilder_path = '../cxxtest.py'
 cxxtest_path = '../..'
 
-env = Environment()
+# First a bit of python magic to make the CxxTestBuilder available 
+# without having to copy it into a particular path.
+import imp
+cxxtest = imp.load_source('cxxtest', cxxtestbuilder_path)
 
-# First build the 'real' library that will be tested.
+# First build the 'real' library, when working on an embedded system 
+# this may involve a cross compiler.
+env = Environment()
+env.BuildDir('build/embedded_platform', 'src')
 env.Append(CPPPATH=['include'])
-libtested = env.StaticLibrary('tested', env.Glob('src/*.c'))
+libtested = env.StaticLibrary('build/embedded_platform/tested', 
+                              env.Glob('build/embedded_platform/*.c'))
 
 # Now create a seperate build environment for the tests so we can keep any
 # options that are specific to testing  seperate from the 'production' build
 # environment. For simplicity I am just copying the production environment.
+# If we are cross compiling for the "real" library, then this 
+# environement might be using the normal compiler.
 env_test = env.Copy()
 
-# In some circumstances you may want to bulid a testing version of the 'real'
-# library here. This may be necesary if you are using any link-time or compile
-# time seams (such as preprocessor magic). ... e.g.
-# env_test.Append(CPPDEFINES=[ ('TESTING,1), ] )
-# libtested_test = env_test.StaticLibrary('tested_test', env.Glob('src/*.c'))
+# Add the CxxTestBuilder to our testing build environment.
+cxxtest.generate(env_test, CXXTEST_DIR = cxxtest_path)
 
-# Add cxxtest to the include path
-env_test.Append(CPPPATH=[cxxtest_path, '.'])
-# And add the library to the link
-env_test.Append(LIBS=[libtested])
-
-# Now lets find all the test code, and feed it to cxxtestgen.py
-test_headers = env_test.Glob('tests/*.h')
-
-# If you were building several different test programs you may want to
-# generalize things below by adding build environment variables for the
-# options to cxxtestgen.py.
-testsrc = env_test.Command('cxxtestmain.cpp', test_headers,
-  'python %s/cxxtestgen.py --error-printer -o $TARGET $SOURCES'%cxxtest_path)
-testprog = env_test.Program('testrunner', testsrc)
-
-# In order to get SCons to actually run this it needs a target to be built.
-# Since I am redirecting the output, you will not see when the build is 
-# happening. But, if any test fails, the build will report a failure, and
-# you can examine testresults.txt for more details.
-testresults = env_test.Command('testresults.txt', testprog,
-                './$SOURCE > $TARGET')
-env_test.AlwaysBuild(testresults)
+# If we were working with an embedded platform we may want to create a 
+# seperate version of our library that runs on our development box in 
+# order to do our initial unit testing. This version may also include 
+# any special preprocessor defines needed for testing e.g. -DTESTING
+env_test.BuildDir('build/dev_platform', 'src')
+env_test.BuildDir('build/tests', 'tests')
+lib_to_test = env_test.StaticLibrary('build/dev_platform/tested',
+                                     env.Glob('build/dev_platform/*.c'))
+env_test.Append(LIBS=lib_to_test)
+env_test.CxxTest(env_test.Glob('tests/*.h'))
 
