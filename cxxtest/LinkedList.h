@@ -45,9 +45,6 @@ namespace CxxTest
         const Link *next() const;
         const Link *prev() const;
 
-        virtual bool setUp() = 0;
-        virtual bool tearDown() = 0;
-
         void attach( List &l );
         void detach( List &l );
 

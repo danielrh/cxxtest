@@ -23,6 +23,8 @@ namespace CxxTest
         virtual const char *suiteName() const = 0;
         
         virtual void run() = 0;
+        virtual bool setUp() = 0;
+        virtual bool tearDown() = 0;
 
         virtual const TestDescription *next() const = 0;
         virtual TestDescription *next() = 0;        
@@ -48,6 +50,9 @@ namespace CxxTest
 
         virtual void activateAllTests() = 0;
         virtual bool leaveOnly( const char * /*testName*/ ) = 0;
+
+        virtual bool setUp() = 0;
+        virtual bool tearDown() = 0;
     };
 
     class WorldDescription : public Link
