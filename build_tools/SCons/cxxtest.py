@@ -42,7 +42,7 @@
 #   now not all paths are imported, but just the path required to run the
 #   interpreter.
 #
-# Last changed: 2008-06-25 23:58:40 CEST
+# Last changed: 2008-08-23 11:15:00 CEST
 
 from SCons.Script import *
 from SCons.Builder import Builder
@@ -61,6 +61,9 @@ def UnitTest(env, target, source = [], **kwargs):
     env.AlwaysBuild(env['CXXTEST_TARGET'])
     return test
 
+def findScript(env):
+    return env.WhereIs('cxxtestgen.py', Dir(env['CXXTEST_DIR']).abspath, '')
+
 def findHeaderDir(env):
     header = env.FindFile('TestSuite.h',[
         os.path.normpath(env['CXXTEST_DIR']),
@@ -68,12 +71,8 @@ def findHeaderDir(env):
         '/usr/include/cxxtest/',
         '/usr/include/'
         ])
-    dir, file = os.path.split(header)
     # the usual include is cxxtest/TestSuite.h, so return one directory less...
-    return os.path.normpath(dir+'../');
-   
-def findScript(env):
-    return env.WhereIs('cxxtestgen.py', [env['CXXTEST_DIR']])
+    return os.path.normpath(header.dir.abspath+'/../');
 
 def generate(env, **kwargs):
     """
@@ -123,14 +122,14 @@ def generate(env, **kwargs):
     env['CXXTEST_PRINTER'] = kwargs.get('CXXTEST_PRINTER', env['CXXTEST_PRINTER']);
     env['CXXTEST_OPTS']    = kwargs.get('CXXTEST_OPTS', env['CXXTEST_OPTS']);
     env['CXXTEST_SUFFIX']  = kwargs.get('CXXTEST_SUFFIX', env['CXXTEST_SUFFIX']);
-    env['CXXTEST_TARGET']  = kwargs.get('CXXTEST_TARGET', env['TARGET']);
+    env['CXXTEST_TARGET']  = kwargs.get('CXXTEST_TARGET', env['CXXTEST_TARGET']);
     env['CXXTEST_CXXFLAGS_REMOVE'] = Split(
             kwargs.get(
                 'CXXTEST_CXXFLAGS_REMOVE',
                 env['CXXTEST_CXXFLAGS_REMOVE']
                 )
             )
-    
+
     #
     # CREATE THE BUILDER
     #
