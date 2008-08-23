@@ -23,7 +23,9 @@
 # 2008-08-23:
 #   John Mitchell of MIT proposed some nice changes regarding tool finding and
 #   reported a (bug) feature request where the cxxtest suite was installed as an
-#   rpm into the system include directories.
+#   rpm into the system include directories. Also, the environment variables can
+#   now be set at anytime in the environment, not just throught kwargs, because
+#   the defaults do not override the values set before tool initialization.
 # 2008-03-29:
 #   Fixed a bug introduced in the last version, where the script would fail if
 #   CXXFLAGS was never set.
