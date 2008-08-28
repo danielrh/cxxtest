@@ -1,0 +1,19 @@
+# Import SConstruct environment.
+#
+Import('env')
+
+# List of source files from which the library is to be constructed.
+#
+lib_sources = Glob('*.cpp')
+
+# Library name with neither prefix nor suffix.
+#
+library_name = 'utils'
+
+# Arrange for library construction
+#
+env.Library(library_name, lib_sources)
+
+# Return library name to SConstruct
+#
+Return('library_name')
