@@ -1,3 +1,4 @@
+# coding=UTF-8
 # CxxTest builder by Gasper Azman
 # Modified by J. Darby Mitchell (2008-08-22)
 #
@@ -21,10 +22,9 @@
 # This should be in a file called cxxtest.py somewhere in the toolpath.
 #
 # CHANGELOG:
-# 2008-08-28: Added CXXTEST_SKIP_ERRORS that makes all tests run no matter
-#             whether they fail or succeed.
-# 2008-08-26: Gasper Azman reduced environment clutter by storing CXXTEST's
-#    CPPPATH separate from CPPPATH and just appending it for tests.
+# 2008-08-28: Gašper Ažman Added CXXTEST_SKIP_ERRORS that makes all tests run no
+#    matter whether they fail or succeed. Fixed the issue where CPPPATH would
+#    vanish.
 # 2008-08-25: Gasper Azman and Darby Mitchell (MIT) refactored the tool to
 #    set defaults that don't override previously set environment variables, and 
 #    automatically search for the cxxtestgen Python script in the path and 
@@ -138,12 +138,10 @@ def generate(env, **kwargs):
     CXXTEST_CXXFLAGS_REMOVE - the flags that cxxtests can't compile with,
                               or give lots of warnings. Will be stripped.
                               Default: -pedantic -Weffc++
-    CXXTEST_CPPPATH - Stuff you want to add to the CPPPATH just for tests. Will
-                        not pollute the environment's path.
-                        Default: '#',the directory cxxtestgen.py is found in, if
-                                 not in the system include directory.
     CXXTEST_RUNNER  - the path to the python binary.
                         Default: searches path for python
+    CXXTEST_SKIP_ERRORS - set to True to continue running the next test if one
+                          test fails. Default: False
     ... and all others that Program() accepts, like CPPPATH etc.
     """
 
@@ -176,8 +174,9 @@ def generate(env, **kwargs):
         # the script was found.  If so, assume that is the header directory, and  
         # therefore the script directory should be included in the CPPPATH
         if(path.exists(path.join(path.dirname(cxxtest), 'cxxtest') ) ):
-           env.AppendUnique(CXXTEST_CPPPATH = path.dirname(cxxtest) )
-    
+           # for some reason, setting PATH here doesn't work for me (Gašper)
+           env.AppendUnique(CXXTEST_CPPPATH = [path.dirname(cxxtest)] )
+        
         #
         # Create the Builder (only if we have a valid cxxtestgen!)
         #
@@ -206,13 +205,13 @@ def generate(env, **kwargs):
             source = Split(target + env['CXXTEST_SUFFIX'])
         sources = Split(source)
         sources[0] = env.CxxTestCpp(sources[0])
-        # append our cppath to kwargs...
-        if (not kwargs.has_key('CPPPATH')):
-            kwargs['CPPPATH']=env['CXXTEST_CPPPATH']
+
+        if (kwargs.has_key('CPPPATH')):
+            kwargs['CPPPATH'] = list(set(kwargs['CPPPATH'] + env['CXXTEST_CPPPATH']))
+        elif (env.has_key('CPPPATH')):
+            kwargs['CPPPATH'] = list(set(env['CPPPATH'] + env['CXXTEST_CPPPATH']))
         else:
-            # the list(set( method eliminates all subsequent items that are the
-            # same, so it correctly preserves path order.
-            kwargs['CPPPATH']=list(set(kwargs['CPPPATH']+env['CXXTEST_CPPPATH']))
+            kwargs['CPPPATH'] = list(set(env['CXXTEST_CPPPATH']))
 
         return UnitTest(env, target, source = sources, **kwargs)
 
