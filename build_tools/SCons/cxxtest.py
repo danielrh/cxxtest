@@ -65,7 +65,6 @@ class ToolCxxTestWarning(SCons.Warnings.Warning):
 
 SCons.Warnings.enableWarningClass(ToolCxxTestWarning)
 
-
 def UnitTest(env, target, source = [], **kwargs):
     cxxflags = ""
     if (type(env["CXXFLAGS"]) == "str"):
@@ -206,12 +205,12 @@ def generate(env, **kwargs):
         sources = Split(source)
         sources[0] = env.CxxTestCpp(sources[0], **kwargs)
 
-        if (kwargs.has_key('CPPPATH')):
-            kwargs['CPPPATH'] = list(set(kwargs['CPPPATH'] + env['CXXTEST_CPPPATH']))
-        elif (env.has_key('CPPPATH')):
-            kwargs['CPPPATH'] = list(set(env['CPPPATH'] + env['CXXTEST_CPPPATH']))
-        else:
-            kwargs['CPPPATH'] = list(set(env['CXXTEST_CPPPATH']))
+        kwargs['CPPPATH'] = list(set(
+            Split(kwargs.get('CPPPATH', [])) +
+            Split(env.get(   'CPPPATH', [])) +
+            Split(kwargs.get('CXXTEST_CPPPATH', [])) +
+            Split(env.get(   'CXXTEST_CPPPATH', []))
+            ))
 
         return UnitTest(env, target, source = sources, **kwargs)
 

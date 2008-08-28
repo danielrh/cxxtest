@@ -4,7 +4,7 @@ if [[ -d "$1" ]]
 then
     echo "### RUNNING TEST $1 ###"
     cd "$1"
-    scons --clean && scons . && scons check
+    scons --clean && scons . && scons check && scons --clean
     ret=$?
     if [[ "x$ret" = "x0" ]]
     then
@@ -21,6 +21,12 @@ else
     return 1
 fi
 }
+
+function cleanup() {
+    rm */.sconsign.dblite
+}
 test default_env &&\
 test nonstandard_cxxtest_dir &&\
-test need_cpppath
+test need_cpppath &&\
+test string_cpppath &&\
+cleanup
