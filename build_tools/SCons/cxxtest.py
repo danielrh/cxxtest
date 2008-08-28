@@ -24,7 +24,7 @@
 # CHANGELOG:
 # 2008-08-28: Gašper Ažman Added CXXTEST_SKIP_ERRORS that makes all tests run no
 #    matter whether they fail or succeed. Fixed the issue where CPPPATH would
-#    vanish.
+#    vanish. Fixed bug #40
 # 2008-08-25: Gasper Azman and Darby Mitchell (MIT) refactored the tool to
 #    set defaults that don't override previously set environment variables, and 
 #    automatically search for the cxxtestgen Python script in the path and 
@@ -204,7 +204,7 @@ def generate(env, **kwargs):
         if (source == []):
             source = Split(target + env['CXXTEST_SUFFIX'])
         sources = Split(source)
-        sources[0] = env.CxxTestCpp(sources[0])
+        sources[0] = env.CxxTestCpp(sources[0], **kwargs)
 
         if (kwargs.has_key('CPPPATH')):
             kwargs['CPPPATH'] = list(set(kwargs['CPPPATH'] + env['CXXTEST_CPPPATH']))

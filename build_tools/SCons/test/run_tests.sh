@@ -6,7 +6,7 @@ then
     cd "$1"
     scons --clean && scons . && scons check
     ret=$?
-    if [[ $ret ]]
+    if [[ "x$ret" = "x0" ]]
     then
         echo "### TEST $1 SUCCESSFUL ###"
         echo
