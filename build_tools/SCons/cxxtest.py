@@ -21,6 +21,8 @@
 # This should be in a file called cxxtest.py somewhere in the toolpath.
 #
 # CHANGELOG:
+# 2008-08-28: Added CXXTEST_SKIP_ERRORS that makes all tests run no matter
+#             whether they fail or succeed.
 # 2008-08-26: Gasper Azman reduced environment clutter by storing CXXTEST's
 #    CPPPATH separate from CPPPATH and just appending it for tests.
 # 2008-08-25: Gasper Azman and Darby Mitchell (MIT) refactored the tool to
@@ -73,7 +75,11 @@ def UnitTest(env, target, source = [], **kwargs):
         cxxflags = cxxflags.replace(item, "")
     kwargs["CXXFLAGS"] = cxxflags;
     test = env.Program(target, source = source, **kwargs)
-    env.Alias(env['CXXTEST_TARGET'], test, test[0].abspath)
+    if (env['CXXTEST_SKIP_ERRORS']):
+        runner = env.Action(test[0].abspath, exitstatfunc=lambda x:0)
+    else:
+        runner = env.Action(test[0].abspath)
+    env.Alias(env['CXXTEST_TARGET'], test, runner)
     env.AlwaysBuild(env['CXXTEST_TARGET'])
     return test
 
@@ -159,6 +165,7 @@ def generate(env, **kwargs):
     env.SetDefault( CXXTEST_CPPPATH = ['#']                 )
     env.SetDefault( CXXTEST_RUNNER  = env.WhereIs('python') )
     env.SetDefault( CXXTEST_CXXFLAGS_REMOVE = ['-pedantic','-Weffc++'] )
+    env.SetDefault( CXXTEST_SKIP_ERRORS = False             )
     
     #Here's where keyword arguments are applied
     apply(env.Replace, (), kwargs)
