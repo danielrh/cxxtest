@@ -247,8 +247,7 @@ def generate(env, **kwargs):
         """
         if (source == []):
             source = Split(target + multiget([kwargs, env], 'CXXTEST_SUFFIX', None))
-        sources = Split(source)
-
+        sources = Flatten(Split(source))
         headers = []
         linkins = []
         for s in sources:

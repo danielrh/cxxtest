@@ -72,4 +72,5 @@ test "string_cpppath" &&\
 test "printer_propagation" &&\
 test "multifile_tests" &&\
 test "target_syntax" &&\
+test "recursive_sources" &&\
 cleanup
