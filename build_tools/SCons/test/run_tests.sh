@@ -1,26 +1,29 @@
 #!/bin/bash
 function test() {
-    if [[ "x$SELECT_TEST" != "x" ]]
+    if [[ "x$SELECT_TEST" != "x" ]] && [[ "x${1%'/'}" != "x$SELECT_TEST" ]]
     then
-        if [[ "x${1%'/'}" != "x$SELECT_TEST" ]]
-        then
-            return 0
-        fi
+        return 0
     fi
 
     if [[ -d "$1" ]]
     then
-        echo "### RUNNING TEST $1 ###"
         cd "$1"
-        scons --clean && scons . && scons check && scons --clean
-        ret=$?
-        if [[ "x$ret" = "x0" ]]
+        if [[ "$ACTION" == "--clean" ]]
         then
-            echo "### TEST $1 SUCCESSFUL ###"
-            echo
-        else
-            echo "### TEST $1 FAILED ###"
-            echo
+            scons --clean
+        elif [[ "$ACTION" == "--run" ]]
+        then
+            echo "### RUNNING TEST $1 ###"
+            scons --clean && scons . && scons check
+            ret=$?
+            if [[ "x$ret" = "x0" ]]
+            then
+                echo "### TEST $1 SUCCESSFUL ###"
+                echo
+            else
+                echo "### TEST $1 FAILED ###"
+                echo
+            fi
         fi
         cd ..
         return $ret
@@ -34,15 +37,28 @@ function cleanup() {
     rm */.sconsign.dblite
 }
 
+ACTION="--run"
 SELECT_TEST=""
-if [[ -d "$1" ]] || [[ "x" == "x$1" ]]
+
+if [[ "$1" == "--clean" ]] || [[ "$1" == "--run" ]]
 then
-    SELECT_TEST=${1%'/'}
+    ACTION="$1"
+    DIR="$2"
+else
+    ACTION="--run"
+    DIR="$1"
+fi
+
+if [[ -d "$DIR" ]] || [[ "x" == "x$DIR" ]]
+then
+    SELECT_TEST=${DIR%'/'}
 else
     cat <<USAGE
 This is the test runner for the SCons builder unit tests.
 
-Usage: run_tests.sh [directory]
+Usage: run_tests.sh [action] [directory]
+    action: --run (default) - runs the test
+            --clean         - cleans up
 If the directory is provided, this will only run the test in that directory.
 Otherwise, it will run all the tests.
 USAGE
@@ -54,4 +70,6 @@ test "nonstandard_cxxtest_dir" &&\
 test "need_cpppath" &&\
 test "string_cpppath" &&\
 test "printer_propagation" &&\
+test "multifile_tests" &&\
+test "target_syntax" &&\
 cleanup

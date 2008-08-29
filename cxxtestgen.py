@@ -139,6 +139,9 @@ def setOptions( options ):
     if gui and not runner:
         runner = 'StdioPrinter'
 
+    if root and part:
+        abort( 'you can\'t use --root and --part at the same time' )
+
 def printVersion():
     '''Print CxxTest version and exit'''
     sys.stdout.write( "This is CxxTest version INSERT_VERSION_HERE.\n" )
@@ -428,6 +431,10 @@ def writePreamble( output ):
 
 def writeMain( output ):
     '''Write the main() function for the test runner'''
+    global root, part
+    # bail out if we must not write the root because --part was specified
+    if part and not root:
+        return
     if gui:
         output.write( 'int main( int argc, char *argv[] ) {\n' )
         if noStaticInit:
@@ -444,7 +451,7 @@ def writeMain( output ):
 wroteWorld = 0
 def writeWorld( output ):
     '''Write the world definitions'''
-    global wroteWorld, part
+    global wroteWorld, part, root
     if wroteWorld: return
     writePreamble( output )
     writeSuites( output )
