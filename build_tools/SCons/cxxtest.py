@@ -205,6 +205,7 @@ def generate(env, **kwargs):
         sources = Split(source)
         sources[0] = env.CxxTestCpp(sources[0], **kwargs)
 
+
         kwargs['CPPPATH'] = list(set(
             Split(kwargs.get('CPPPATH', [])) +
             Split(env.get(   'CPPPATH', [])) +
