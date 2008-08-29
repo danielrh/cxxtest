@@ -208,7 +208,6 @@ def generate(env, **kwargs):
     env.SetDefault( CXXTEST_RUNNER  = env.WhereIs('python') )
     env.SetDefault( CXXTEST_CXXFLAGS_REMOVE = ['-pedantic','-Weffc++'] )
     env.SetDefault( CXXTEST_SKIP_ERRORS = False             )
-    env.SetDefault( CXXTEST_MULTISRC_SWITCH = '--root'      )
     
     #Here's where keyword arguments are applied
     apply(env.Replace, (), kwargs)
@@ -226,7 +225,7 @@ def generate(env, **kwargs):
         # Create the Builder (only if we have a valid cxxtestgen!)
         #
         cxxtest_builder = Builder(
-            action = "$CXXTEST_RUNNER $CXXTEST --$CXXTEST_PRINTER $CXXTEST_MULTISRC_SWITCH $CXXTEST_OPTS -o $TARGET $SOURCE",
+            action = "$CXXTEST_RUNNER $CXXTEST --$CXXTEST_PRINTER $CXXTEST_OPTS -o $TARGET $SOURCE",
             suffix = ".cpp",
             src_suffix = '$CXXTEST_SUFFIX'
             )
@@ -263,13 +262,9 @@ def generate(env, **kwargs):
             # old functionality - the 1st source specified is the test
             deps.append(env.CxxTestCpp(linkins.pop(0), **kwargs))
         else:
-            if 'CXXTEST_MULTISRC_SWITCH' in kwargs:
-                del kwargs['CXXTEST_MULTISRC_SWITCH']
-            deps.append(env.CxxTestCpp(headers.pop(0), 
-                CXXTEST_MULTISRC_SWITCH = '--root', **kwargs))
+            deps.append(env.CxxTestCpp(headers.pop(0), **kwargs))
             deps.extend(
-                [env.CxxTestCpp(
-                    header, CXXTEST_MULTISRC_SWITCH = '--part', **kwargs)
+                [env.CxxTestCpp(header, CXXTEST_PRINTER = 'part', **kwargs)
                     for header in headers]
                 )
         deps.extend(linkins)
