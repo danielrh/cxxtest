@@ -34,7 +34,10 @@ function test() {
 }
 
 function cleanup() {
-    rm */.sconsign.dblite
+    if [[ "$ACTION" == "--clean" ]]
+    then
+        rm */.sconsign.dblite
+    fi
 }
 
 ACTION="--run"

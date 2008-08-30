@@ -5,4 +5,4 @@ env = Environment(
     CXXTEST = '../../../../cxxtestgen.py',
     )
 
-env.CxxTest(['src/failtest.t.h'], CPPPATH=['#'], CXXTEST_PRINTER="runner=CrazyRunner")
+env.CxxTest(['src/failtest.t.h'], CPPPATH=['#'], CXXTEST_RUNNER="CrazyRunner")

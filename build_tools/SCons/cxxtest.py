@@ -53,8 +53,10 @@
 # called that. Normal Program builder rules apply.
 #
 # == Changelog ==
-#
-# 2008-08-20: Gašper Ažman added the --root and --part functionality.
+# 2008-08-30: CXXTEST_RUNNER became CXXTEST_PYTHON, and CXXTEST_PRINTER became
+#    CXXTEST_RUNNER because it now governs the argument of the --runner
+#    commandline option.
+# 2008-08-29: Gašper Ažman added the --root and --part functionality.
 #    Documentation above.
 # 2008-08-28: Gašper Ažman added CXXTEST_SKIP_ERRORS that makes all tests run no
 #    matter whether they fail or succeed. Fixed the issue where CPPPATH would
@@ -175,14 +177,14 @@ def generate(env, **kwargs):
     CXXTEST         - the path to the cxxtestgen.py
                         Default: searches SCons environment, OS environment,
                         path and project in that order.
-    CXXTEST_PRINTER - the printer to use.  Default: error-printer
+    CXXTEST_RUNNER  - the runner to use.  Default: ErrorPrinter
     CXXTEST_OPTS    - other options to pass to cxxtest.  Default: ''
     CXXTEST_SUFFIX  - the suffix of the test files.  Default: '.t.h'
     CXXTEST_TARGET  - the target to append the tests to.  Default: check
     CXXTEST_CXXFLAGS_REMOVE - the flags that cxxtests can't compile with,
                               or give lots of warnings. Will be stripped.
                               Default: -pedantic -Weffc++
-    CXXTEST_RUNNER  - the path to the python binary.
+    CXXTEST_PYTHON  - the path to the python binary.
                         Default: searches path for python
     CXXTEST_SKIP_ERRORS - set to True to continue running the next test if one
                           test fails. Default: False
@@ -200,12 +202,12 @@ def generate(env, **kwargs):
     # Expected behavior: keyword arguments override environment variables;
     # environment variables override default settings.
     #          
-    env.SetDefault( CXXTEST_PRINTER = 'error-printer'       )
+    env.SetDefault( CXXTEST_RUNNER  = 'ErrorPrinter'        )
     env.SetDefault( CXXTEST_OPTS    = ''                    )
     env.SetDefault( CXXTEST_SUFFIX  = '.t.h'                )
     env.SetDefault( CXXTEST_TARGET  = 'check'               )
     env.SetDefault( CXXTEST_CPPPATH = ['#']                 )
-    env.SetDefault( CXXTEST_RUNNER  = env.WhereIs('python') )
+    env.SetDefault( CXXTEST_PYTHON  = env.WhereIs('python') )
     env.SetDefault( CXXTEST_CXXFLAGS_REMOVE = ['-pedantic','-Weffc++'] )
     env.SetDefault( CXXTEST_SKIP_ERRORS = False             )
     
@@ -225,7 +227,7 @@ def generate(env, **kwargs):
         # Create the Builder (only if we have a valid cxxtestgen!)
         #
         cxxtest_builder = Builder(
-            action = "$CXXTEST_RUNNER $CXXTEST --$CXXTEST_PRINTER $CXXTEST_OPTS -o $TARGET $SOURCE",
+            action = "$CXXTEST_PYTHON $CXXTEST --runner=$CXXTEST_RUNNER $CXXTEST_OPTS -o $TARGET $SOURCE",
             suffix = ".cpp",
             src_suffix = '$CXXTEST_SUFFIX'
             )
@@ -263,7 +265,7 @@ def generate(env, **kwargs):
         else:
             deps.append(env.CxxTestCpp(headers.pop(0), **kwargs))
             deps.extend(
-                [env.CxxTestCpp(header, CXXTEST_PRINTER = 'part', **kwargs)
+                [env.CxxTestCpp(header, CXXTEST_RUNNER = 'none', **kwargs)
                     for header in headers]
                 )
         deps.extend(linkins)

@@ -3,10 +3,10 @@
 Generate test source file for CxxTest.
 
   -v, --version          Write CxxTest version
-  -o, --output=NAME      Write output to file NAME
+  -o, --output=NAME      Write output to file NAME. Required.
   --runner=CLASS         Create a main() function that runs CxxTest::CLASS
   --gui=CLASS            Like --runner, with GUI component
-  --error-printer        Same as --runner=ErrorPrinter
+  --error-printer        Same as --runner=ErrorPrinter. Deprecated.
   --abort-on-fail        Abort tests on failed asserts (like xUnit)
   --have-std             Use standard library (even if not found in tests)
   --no-std               Don\'t use standard library (even if found in tests)
@@ -15,8 +15,8 @@ Generate test source file for CxxTest.
   --longlong=[TYPE]      Use TYPE (default: long long) as long long
   --template=TEMPLATE    Use TEMPLATE file to generate the test runner
   --include=HEADER       Include HEADER in test runner before other headers
-  --root                 Write CxxTest globals
-  --part                 Don\'t write CxxTest globals
+  --root                 Write CxxTest globals. Deprecated. Use --runner=none
+  --part                 Don\'t write CxxTest globals. Deprecated. Use --runner=none
   --no-static-init       Don\'t rely on static initialization
 '''
 
@@ -34,8 +34,6 @@ inBlock = 0
 outputFileName = None
 runner = None
 gui = None
-root = None
-part = None
 noStaticInit = None
 templateFileName = None
 headers = []
@@ -74,6 +72,12 @@ def abort( problem ):
     sys.stderr.write( '\n\n' )
     sys.exit(2)
 
+def warn( problem ):
+    '''Print an error message and don't exit.'''
+    sys.stderr.write( '\n' )
+    sys.stderr.write( str(problem) )
+    sys.stderr.write( '\n\n' )
+
 def parseCommandline():
     '''Analyze command line arguments'''
     try:
@@ -90,7 +94,7 @@ def parseCommandline():
 def setOptions( options ):
     '''Set options specified on command line'''
     global outputFileName, templateFileName, runner, gui, haveStandardLibrary, factor, longlong
-    global haveExceptionHandling, noExceptionHandling, abortOnFail, headers, root, part, noStaticInit
+    global haveExceptionHandling, noExceptionHandling, abortOnFail, headers, noStaticInit
     for o, a in options:
         if o in ('-v', '--version'):
             printVersion()
@@ -107,6 +111,8 @@ def setOptions( options ):
                 a = ('"%s"' % a)
             headers.append( a )
         elif o == '--error-printer':
+            warn( 'Warning: Deprecated. Use the --runner=ErrorPrinter syntax'
+                  ' or nothing, as this is the default.' )
             runner = 'ErrorPrinter'
             haveStandardLibrary = 1
         elif o == '--abort-on-fail':
@@ -120,9 +126,12 @@ def setOptions( options ):
         elif o == '--no-eh':
             noExceptionHandling = 1
         elif o == '--root':
-            root = 1
+            warn( 'Warning: Deprecated. Use --runner=SomeRunner to write the'
+                  ' main. User --runner=none as a substitute for --part.' )
         elif o == '--part':
-            part = 1
+            warn( 'Warning: Deprecated. Use --runner=none as a substitute for'
+                  ' --part.' )
+            runner='none'
         elif o == '--no-static-init':
             noStaticInit = 1
         elif o == '--factor':
@@ -133,14 +142,22 @@ def setOptions( options ):
             else:
                 longlong = 'long long'
 
-    if noStaticInit and (root or part):
+    if noStaticInit and outputGlobals():
         abort( '--no-static-init cannot be used with --root/--part' )
 
     if gui and not runner:
-        runner = 'StdioPrinter'
+        if shouldOutputGlobals():
+            runner = 'StdioPrinter'
+        else:
+            abort( '--gui cannot be used with --runner=none' )
 
-    if root and part:
-        abort( 'you can\'t use --root and --part at the same time' )
+    if not outputFileName:
+        abort( 'You must provide the --output option.' )
+
+def shouldOutputGlobals():
+    '''whether we are outputting the globals and main.'''
+    global runner
+    return runner != 'none'
 
 def printVersion():
     '''Print CxxTest version and exit'''
@@ -150,7 +167,7 @@ def printVersion():
 def setFiles( patterns ):
     '''Set input files specified on command line'''
     files = expandWildcards( patterns )
-    if len(files) is 0 and not root:
+    if len(files) is 0 and not shouldOutputGlobals():
         usage( "No input files found" )
     return files
 
@@ -172,7 +189,7 @@ def scanInputFiles(files):
     for file in files:
         scanInputFile(file)
     global suites
-    if len(suites) is 0 and not root:
+    if len(suites) is 0 and not shouldOutputGlobals():
         abort( 'No tests defined' )
 
 def scanInputFile(fileName):
@@ -422,26 +439,25 @@ def writePreamble( output ):
     output.write( "#include <cxxtest/TestTracker.h>\n" )
     output.write( "#include <cxxtest/TestRunner.h>\n" )
     output.write( "#include <cxxtest/RealDescriptions.h>\n" )
-    if runner:
-        output.write( "#include <cxxtest/%s.h>\n" % runner )
-    if gui:
-        output.write( "#include <cxxtest/%s.h>\n" % gui )
+
+    if shouldOutputGlobals():
+        if runner:
+            output.write( "#include <cxxtest/%s.h>\n" % runner )
+        if gui:
+            output.write( "#include <cxxtest/%s.h>\n" % gui )
+
     output.write( "\n" )
     wrotePreamble = 1
 
 def writeMain( output ):
     '''Write the main() function for the test runner'''
-    global root, part
-    # bail out if we must not write the root because --part was specified
-    if part and not root:
-        return
     if gui:
         output.write( 'int main( int argc, char *argv[] ) {\n' )
         if noStaticInit:
             output.write( ' CxxTest::initialize();\n' )
         output.write( ' return CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s>( argc, argv ).run();\n' % (gui, runner) )
         output.write( '}\n' )
-    elif runner:
+    elif runner and shouldOutputGlobals():
         output.write( 'int main() {\n' )
         if noStaticInit:
             output.write( ' CxxTest::initialize();\n' )
@@ -451,12 +467,11 @@ def writeMain( output ):
 wroteWorld = 0
 def writeWorld( output ):
     '''Write the world definitions'''
-    global wroteWorld, part, root
+    global wroteWorld
     if wroteWorld: return
     writePreamble( output )
     writeSuites( output )
-    if root or not part:
-        writeRoot( output )
+    writeRoot( output )
     if noStaticInit:
         writeInitialize( output )
     wroteWorld = 1
@@ -571,7 +586,8 @@ def writeStaticDescription( output, suite ):
 
 def writeRoot(output):
     '''Write static members of CxxTest classes'''
-    output.write( '#include <cxxtest/Root.cpp>\n' )
+    if shouldOutputGlobals():
+        output.write( '#include <cxxtest/Root.cpp>\n' )
 
 def writeInitialize(output):
     '''Write CxxTest::initialize(), which replaces static initialization'''
