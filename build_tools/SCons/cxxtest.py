@@ -3,10 +3,14 @@
 # == Preamble ==
 #
 # CxxTest builder by Gasper Azman
-# Modified by J. Darby Mitchell (2008-08-22)
+#
+# Contributors:
+# J. Darby Mitchell (2008-08-22)
 #
 # please send bugreports/praise/comments/criticism to
-# gasper.azman at gmail.com
+# gasper.azman at gmail.com or the cxxtest mailing list.
+#
+# This file is maintained as a part of the CxxTest test suite.
 # 
 # == About ==
 #
