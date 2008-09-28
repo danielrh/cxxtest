@@ -57,6 +57,8 @@
 # called that. Normal Program builder rules apply.
 #
 # == Changelog ==
+# 2008-09-28: Added the option that #, as understood in pathnames in the rest of
+#    SCons, is now also understood here. Minor bugfixes all around.
 # 2008-08-30: CXXTEST_RUNNER became CXXTEST_PYTHON, and CXXTEST_PRINTER became
 #    CXXTEST_RUNNER because it now governs the argument of the --runner
 #    commandline option.
