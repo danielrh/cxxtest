@@ -76,4 +76,5 @@ test "printer_propagation" &&\
 test "multifile_tests" &&\
 test "target_syntax" &&\
 test "recursive_sources" &&\
+test "expanding_#" &&\
 cleanup

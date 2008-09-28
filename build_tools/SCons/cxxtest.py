@@ -149,10 +149,21 @@ def findCxxTestGen(env):
     cxxtest = (env.get('CXXTEST', None) or
                os.environ.get('CXXTEST', None)
               )
-    
-    # If the user specified the location in the environment, make sure it was correct
-    if(cxxtest and isValidScriptPath(cxxtest) ):
-       return cxxtest
+
+    if cxxtest:
+        try:
+            #try getting the absolute path of the file first. Required to expand '#'
+            cxxtest = env.File(cxxtest).abspath;
+        except TypeError:
+            try:
+                #maybe only the directory was specified?
+                cxxtest = env.File(cxxtest+'/cxxtestgen.py').abspath;
+            except TypeError:
+                pass
+
+        # If the user specified the location in the environment, make sure it was correct
+        if isValidScriptPath(cxxtest):
+           return cxxtest
     
     # No valid environment variable found, so...
     # Next, check the path...
@@ -161,7 +172,7 @@ def findCxxTestGen(env):
                env.WhereIs('cxxtestgen.py', path=Dir(path.join('#', 'cxxtest') ).abspath) 
               )
     
-    if(cxxtest):
+    if cxxtest:
         return cxxtest
     else:
         # If we weren't able to locate the cxxtestgen.py script, complain...
@@ -194,9 +205,9 @@ def generate(env, **kwargs):
     print "Loading CxxTest tool..."
     
     #If the user specified the path to CXXTEST, make sure it is correct
-    #otherwise, search for and set the default toolpath
-    if(not kwargs.has_key('CXXTEST') or not isValidScriptPath(kwargs['CXXTEST']) ):
-        env.SetDefault( CXXTEST = findCxxTestGen(env) )
+    #otherwise, search for and set the default toolpath.
+    if (not kwargs.has_key('CXXTEST') or not isValidScriptPath(kwargs['CXXTEST']) ):
+        env["CXXTEST"] = findCxxTestGen(env)
 
     #
     # Expected behavior: keyword arguments override environment variables;
@@ -227,7 +238,8 @@ def generate(env, **kwargs):
         # Create the Builder (only if we have a valid cxxtestgen!)
         #
         cxxtest_builder = Builder(
-            action = "$CXXTEST_PYTHON $CXXTEST --runner=$CXXTEST_RUNNER $CXXTEST_OPTS -o $TARGET $SOURCE",
+            action =
+            [["$CXXTEST_PYTHON",cxxtest,"--runner=$CXXTEST_RUNNER","$CXXTEST_OPTS","-o","$TARGET","$SOURCE"]],
             suffix = ".cpp",
             src_suffix = '$CXXTEST_SUFFIX'
             )
