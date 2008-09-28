@@ -1,4 +1,8 @@
-env = Environment(toolpath=['../../'],tools=['default','cxxtest'])
+env = Environment(
+    toolpath=['../../'],
+    tools=['default','cxxtest'],
+    CXXTEST='#/../../../../cxxtestgen.py'
+    )
 
 env['CXXTEST_SKIP_ERRORS'] = True
 env.CxxTest(['src/ThrowNoStd.h'])
