@@ -5,7 +5,9 @@
 # CxxTest builder by Gasper Azman
 #
 # Contributors:
-# J. Darby Mitchell (2008-08-22)
+# J. Darby Mitchell
+# Diego Nieto Cid
+# Joe Maruzsevski
 #
 # please send bugreports/praise/comments/criticism to
 # gasper.azman at gmail.com or the cxxtest mailing list.
