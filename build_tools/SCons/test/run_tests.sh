@@ -77,4 +77,5 @@ test "multifile_tests" &&\
 test "target_syntax" &&\
 test "recursive_sources" &&\
 test "expanding_#" &&\
+test "include_CCFLAGS" &&\
 cleanup

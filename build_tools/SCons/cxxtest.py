@@ -108,12 +108,17 @@ def UnitTest(env, target, source = [], **kwargs):
     """
 
     cxxflags = ""
-    if (type(env["CXXFLAGS"]) == "str"):
-        cxxflags = env["CXXFLAGS"]
+    ccflags  = ""
+    if isinstance(env["CCFLAGS"], str):
+        ccflags += env["CCFLAGS"]
+    if isinstance(env["CXXFLAGS"], str):
+        cxxflags += env["CXXFLAGS"]
     cxxflags = kwargs.get("CXXFLAGS", cxxflags)
     for item in env['CXXTEST_CXXFLAGS_REMOVE']:
         cxxflags = cxxflags.replace(item, "")
-    kwargs["CXXFLAGS"] = cxxflags;
+        ccflags  = ccflags.replace(item, "")
+    kwargs["CXXFLAGS"] = cxxflags
+    kwargs["CCFLAGS"]  = ccflags
     test = env.Program(target, source = source, **kwargs)
     if (env['CXXTEST_SKIP_ERRORS']):
         runner = env.Action(test[0].abspath, exitstatfunc=lambda x:0)
@@ -225,7 +230,7 @@ def generate(env, **kwargs):
     env.SetDefault( CXXTEST_TARGET  = 'check'               )
     env.SetDefault( CXXTEST_CPPPATH = ['#']                 )
     env.SetDefault( CXXTEST_PYTHON  = env.WhereIs('python') )
-    env.SetDefault( CXXTEST_CXXFLAGS_REMOVE = ['-pedantic','-Weffc++'] )
+    env.SetDefault( CXXTEST_CXXFLAGS_REMOVE = ['-pedantic','-Weffc++','-pedantic-errors'] )
     env.SetDefault( CXXTEST_SKIP_ERRORS = False             )
     
     #Here's where keyword arguments are applied
